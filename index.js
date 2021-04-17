@@ -21,13 +21,13 @@ const onHttpStart = () => {
 
 
 const Schema = mongoose.Schema
-const ItemSchema = new Schema({
+const GameSchema = new Schema({
     name: String,
     rarity: String,
     description: String,
     goldPerTurn: Number
 })
-const Item = mongoose.model("items_table", ItemSchema)
+const Game = mongoose.model("items_table", GameSchema)
 
 
 const express = require("express");
@@ -37,7 +37,7 @@ app.use(express.json());
 
 // GET all
 app.get("/api/items", (req, res) => {
-    Item.find().exec().then(
+    Game.find().exec().then(
         (results) => {
             res.status(200).send(results);
         }
@@ -52,7 +52,7 @@ app.get("/api/items", (req, res) => {
 // GET one
 app.get("/api/items/:item_name", (req, res) => {
     let input = req.params.item_name;
-    Item.find({name: input}).exec().then(
+    Game.find({name: input}).exec().then(
         (results) => {
             if(results.length === 0){
                 res.status(404).send(`Item with name ${input} not found`)
@@ -71,7 +71,7 @@ app.get("/api/items/:item_name", (req, res) => {
 app.post("/api/items", (req, res) => {
     let dataToInsert = req.body;
     if (dataToInsert.name && dataToInsert.rarity) {
-        const newItem = Item(dataToInsert)
+        const newItem = Game(dataToInsert)
         newItem.save().then(
             () => {
                 res.status(404).send({ "message": `Item with name ${dataToInsert.name} is successfully inserted` });
@@ -94,7 +94,7 @@ app.post("/api/items", (req, res) => {
 //DELETE one
 app.delete("/api/items/:item_name", (req, res) => {
     let deleteName = req.params.item_name
-    Item.findOneAndDelete({name: deleteName}).exec().then(
+    Game.findOneAndDelete({name: deleteName}).exec().then(
         (results) => {
             if(!results){
                 res.status(406).send(`Item with name ${deleteName} not found`)
