@@ -1,6 +1,6 @@
 //mongo
 const mongoose = require("mongoose");
-const mongoURL = "mongodb+srv://qinadb:fruehJqBVABaBYO0@cluster0.vf3iw.mongodb.net/prog34104?retryWrites=true&w=majority"
+const mongoURL = "mongodb+srv://dbUser:0000@cluster0.x7xyu.mongodb.net/GameDB?retryWrites=true&w=majority"
 const connectionOptions = { useNewUrlParser: true, useUnifiedTopology: true }
 
 const HTTP_PORT = process.env.PORT || 8080;
@@ -52,18 +52,18 @@ app.get("/api/items", (req, res) => {
 // GET one
 app.get("/api/items/:item_name", (req, res) => {
     let input = req.params.item_name;
-    Item.find({name: input}).exec().then(
+    Item.find({ name: input }).exec().then(
         (results) => {
-            if(results.length === 0){
+            if (results.length === 0) {
                 res.status(404).send(`Item with name ${input} not found`)
-            }else{
+            } else {
                 res.status(200).send(results);
             }
         }
     ).catch(
         (err) => {
             console.log(err)
-        } 
+        }
     )
 });
 
@@ -94,12 +94,12 @@ app.post("/api/items", (req, res) => {
 //DELETE one
 app.delete("/api/items/:item_name", (req, res) => {
     let deleteName = req.params.item_name
-    Item.findOneAndDelete({name: deleteName}).exec().then(
+    Item.findOneAndDelete({ name: deleteName }).exec().then(
         (results) => {
-            if(!results){
+            if (!results) {
                 res.status(406).send(`Item with name ${deleteName} not found`)
 
-            }else{
+            } else {
                 res.status(200).send(`Item with name ${deleteName} is deleted successfully`)
             }
         }
