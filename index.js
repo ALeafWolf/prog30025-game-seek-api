@@ -1,6 +1,6 @@
 //mongo
 const mongoose = require("mongoose");
-const mongoURL = "mongodb+srv://qinadb:fruehJqBVABaBYO0@cluster0.vf3iw.mongodb.net/prog34104?retryWrites=true&w=majority"
+const mongoURL = "mongodb+srv://dbUser:0000@cluster0.x7xyu.mongodb.net/GameDB?retryWrites=true&w=majority"
 const connectionOptions = { useNewUrlParser: true, useUnifiedTopology: true }
 
 const HTTP_PORT = process.env.PORT || 8080;
@@ -22,13 +22,20 @@ const onHttpStart = () => {
 
 const Schema = mongoose.Schema
 const GameSchema = new Schema({
-    name: String,
-    rarity: String,
-    description: String,
-    goldPerTurn: Number
+    title: String,
+    publisher: String,
+    developer: String,
+    platform: String,
+    release: String,
+    genre: String,
+    description: String
 })
-const Game = mongoose.model("items_table", GameSchema)
-
+const Game = mongoose.model("GameCollection", GameSchema)
+const g1 = new Game({
+    title: "aaa",
+    publisher: "bbb"
+})
+g1.save()
 
 const express = require("express");
 const app = express();
@@ -52,18 +59,19 @@ app.get("/api/items", (req, res) => {
 // GET one
 app.get("/api/items/:item_name", (req, res) => {
     let input = req.params.item_name;
+
     Game.find({name: input}).exec().then(
         (results) => {
-            if(results.length === 0){
+            if (results.length === 0) {
                 res.status(404).send(`Item with name ${input} not found`)
-            }else{
+            } else {
                 res.status(200).send(results);
             }
         }
     ).catch(
         (err) => {
             console.log(err)
-        } 
+        }
     )
 });
 
@@ -93,13 +101,14 @@ app.post("/api/items", (req, res) => {
 
 //DELETE one
 app.delete("/api/items/:item_name", (req, res) => {
-    let deleteName = req.params.item_name
+    let deleteName = req.params.item_name;
+
     Game.findOneAndDelete({name: deleteName}).exec().then(
         (results) => {
-            if(!results){
+            if (!results) {
                 res.status(406).send(`Item with name ${deleteName} not found`)
 
-            }else{
+            } else {
                 res.status(200).send(`Item with name ${deleteName} is deleted successfully`)
             }
         }
