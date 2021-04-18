@@ -1,7 +1,7 @@
 //mongo
 const mongoose = require("mongoose");
 const mongoURL = "mongodb+srv://dbUser:0000@cluster0.x7xyu.mongodb.net/GameDB?retryWrites=true&w=majority"
-const connectionOptions = { useNewUrlParser: true, useUnifiedTopology: true }
+const connectionOptions = { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}
 
 const HTTP_PORT = process.env.PORT || 8080;
 mongoose.connect(mongoURL, connectionOptions).then(
@@ -31,11 +31,6 @@ const GameSchema = new Schema({
     description: String
 })
 const Game = mongoose.model("GameCollection", GameSchema)
-const g1 = new Game({
-    title: "aaa",
-    publisher: "bbb"
-})
-g1.save()
 
 const express = require("express");
 const app = express();
@@ -43,7 +38,7 @@ app.use(express.json());
 
 
 // GET all
-app.get("/api/items", (req, res) => {
+app.get("/api/games", (req, res) => {
     Game.find().exec().then(
         (results) => {
             res.status(200).send(results);
@@ -51,19 +46,18 @@ app.get("/api/items", (req, res) => {
     ).catch(
         (err) => {
             console.log(err)
-            res.status(500).send("Error when getting items from database.")
+            res.status(500).send("Error when getting games from database.")
         }
     )
 });
 
 // GET one
-app.get("/api/items/:item_name", (req, res) => {
-    let input = req.params.item_name;
-
-    Game.find({name: input}).exec().then(
+app.get("/api/games/:title", (req, res) => {
+    let input = req.params.title;
+    Game.find({title: input}).exec().then(
         (results) => {
             if (results.length === 0) {
-                res.status(404).send(`Item with name ${input} not found`)
+                res.status(404).send(`Game with title ${input} not found`)
             } else {
                 res.status(200).send(results);
             }
@@ -76,13 +70,13 @@ app.get("/api/items/:item_name", (req, res) => {
 });
 
 // ADD one
-app.post("/api/items", (req, res) => {
+app.post("/api/games", (req, res) => {
     let dataToInsert = req.body;
-    if (dataToInsert.name && dataToInsert.rarity) {
-        const newItem = Game(dataToInsert)
-        newItem.save().then(
+    if (dataToInsert.title) {
+        const newGame = Game(dataToInsert)
+        newGame.save().then(
             () => {
-                res.status(404).send({ "message": `Item with name ${dataToInsert.name} is successfully inserted` });
+                res.status(404).send({ "message": `Game with title ${dataToInsert.title} is successfully inserted` });
             }
         ).catch(
             err => {
@@ -94,22 +88,16 @@ app.post("/api/items", (req, res) => {
     }
 });
 
-//ADD many
-app.post("/api/items", (req, res) => {
-    res.status(404).send();
-});
-
 //DELETE one
-app.delete("/api/items/:item_name", (req, res) => {
-    let deleteName = req.params.item_name;
-
-    Game.findOneAndDelete({name: deleteName}).exec().then(
+app.delete("/api/games/:title", (req, res) => {
+    let deleteName = req.params.title;
+    Game.findOneAndDelete({title: deleteName}).exec().then(
         (results) => {
             if (!results) {
-                res.status(406).send(`Item with name ${deleteName} not found`)
+                res.status(406).send(`Game with title ${deleteName} not found`)
 
             } else {
-                res.status(200).send(`Item with name ${deleteName} is deleted successfully`)
+                res.status(200).send(`Game with title ${deleteName} is deleted successfully`)
             }
         }
     ).catch(
@@ -120,19 +108,30 @@ app.delete("/api/items/:item_name", (req, res) => {
 });
 
 //DELETE all
-app.delete("/api/items", (req, res) => {
-    res.status(404).send();
-});
-
-//UPDATE one
-app.put("/api/items/:item_id", (req, res) => {
+app.delete("/api/games", (req, res) => {
     res.status(501).send("Not implemented");
 });
 
-//UPDATE many
-app.put("/api/items", (req, res) => {
-    res.status(404).send();
+//UPDATE one
+app.put("/api/games/:title", (req, res) => {
+    let updateTitle = req.params.title;
+    let dataToUpdate = req.body;
+    Game.findOneAndUpdate({title: updateTitle}, dataToUpdate, {new: false}).exec().then(
+        (results) => {
+            if (!results) {
+                res.status(406).send(`Game with title ${updateTitle} not found`)
+
+            } else {
+                res.status(200).send(`Game with title ${updateTitle} is updated`)
+            }
+        }
+    ).catch(
+        err => {
+            console.log(err)
+        }
+    )
 });
+
 
 
 
