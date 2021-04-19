@@ -1,7 +1,7 @@
 //mongo
 const mongoose = require("mongoose");
 const mongoURL = "mongodb+srv://dbUser:0000@cluster0.x7xyu.mongodb.net/GameDB?retryWrites=true&w=majority"
-const connectionOptions = { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}
+const connectionOptions = { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }
 
 const HTTP_PORT = process.env.PORT || 8080;
 mongoose.connect(mongoURL, connectionOptions).then(
@@ -35,10 +35,12 @@ const Game = mongoose.model("GameCollection", GameSchema)
 const express = require("express");
 var cors = require('cors')
 const app = express();
-app.use(cors());
+app.use(express.json({
+    type: ['application/json', 'text/plain']
+}));
 
 // GET all
-app.get("/api/games", (req, res) => {
+app.get("/api/games", cors(), (req, res) => {
     Game.find().exec().then(
         (results) => {
             res.status(200).send(results);
@@ -52,9 +54,9 @@ app.get("/api/games", (req, res) => {
 });
 
 // GET one
-app.get("/api/games/:title", (req, res) => {
+app.get("/api/games/:title", cors(), (req, res) => {
     let input = req.params.title;
-    Game.find({title: input}).exec().then(
+    Game.find({ title: input }).exec().then(
         (results) => {
             if (results.length === 0) {
                 res.status(404).send(`Game with title ${input} not found`)
@@ -72,11 +74,12 @@ app.get("/api/games/:title", (req, res) => {
 // ADD one
 app.post("/api/games", (req, res) => {
     let dataToInsert = req.body;
-    if (dataToInsert.title) {
+    console.log(dataToInsert)
+    if ("title" in dataToInsert) {
         const newGame = Game(dataToInsert)
         newGame.save().then(
             () => {
-                res.status(404).send({ "message": `Game with title ${dataToInsert.title} is successfully inserted` });
+                res.status(200).send({ "message": `Game with title ${dataToInsert.title} is successfully inserted` });
             }
         ).catch(
             err => {
@@ -91,7 +94,7 @@ app.post("/api/games", (req, res) => {
 //DELETE one
 app.delete("/api/games/:title", (req, res) => {
     let deleteName = req.params.title;
-    Game.findOneAndDelete({title: deleteName}).exec().then(
+    Game.findOneAndDelete({ title: deleteName }).exec().then(
         (results) => {
             if (!results) {
                 res.status(406).send(`Game with title ${deleteName} not found`)
@@ -116,7 +119,7 @@ app.delete("/api/games", (req, res) => {
 app.put("/api/games/:title", (req, res) => {
     let updateTitle = req.params.title;
     let dataToUpdate = req.body;
-    Game.findOneAndUpdate({title: updateTitle}, dataToUpdate, {new: false}).exec().then(
+    Game.findOneAndUpdate({ title: updateTitle }, dataToUpdate, { new: false }).exec().then(
         (results) => {
             if (!results) {
                 res.status(406).send(`Game with title ${updateTitle} not found`)
