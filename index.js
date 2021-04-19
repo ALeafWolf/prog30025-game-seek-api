@@ -37,7 +37,7 @@ var cors = require('cors')
 const app = express();
 app.use(express.json({
     type: ['application/json', 'text/plain']
-}));
+}), cors());
 
 // GET all
 app.get("/api/games", cors(), (req, res) => {
